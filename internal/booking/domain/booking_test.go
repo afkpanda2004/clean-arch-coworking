@@ -96,3 +96,49 @@ func TestConfirmPayment_AlreadyPaid(t *testing.T) {
 		t.Errorf("expected ErrWrongState, got %v", err)
 	}
 }
+
+func TestCancel_Success(t *testing.T) {
+	slot := validSlot(t)
+	booking, _ := domain.NewBooking(uuid.New(), uuid.New(), slot, domain.NewMoney(200, "USD"))
+	_ = booking.PullEvents()
+
+	err := booking.Cancel()
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if booking.Status() != domain.Cancelled {
+		t.Errorf("expected status Cancelled, got %v", booking.Status())
+	}
+
+	events := booking.PullEvents()
+	if len(events) != 1 {
+		t.Fatalf("expected 1 event, got %d", len(events))
+	}
+	if _, ok := events[0].(domain.BookingCancelled); !ok {
+		t.Errorf("expected BookingCancelled event, got %T", events[0])
+	}
+
+}
+
+func TestCancel_AlreadyPaid(t *testing.T) {
+	slot := validSlot(t)
+	booking, _ := domain.NewBooking(uuid.New(), uuid.New(), slot, domain.NewMoney(200, "USD"))
+	_ = booking.ConfirmPayment("tx-123")
+
+	err := booking.Cancel()
+	if err != domain.ErrBookingAlreadyPaid {
+		t.Errorf("expected ErrBookingAlreadyPaid, got %v", err)
+	}
+
+}
+
+func TestCancel_AlreadyCancelled(t *testing.T) {
+	slot := validSlot(t)
+	booking, _ := domain.NewBooking(uuid.New(), uuid.New(), slot, domain.NewMoney(200, "USD"))
+	_ = booking.Cancel()
+
+	err := booking.Cancel()
+	if err != domain.ErrAlreadyCancelled {
+		t.Errorf("expected ErrAlreadyCancelled, got %v", err)
+	}
+}

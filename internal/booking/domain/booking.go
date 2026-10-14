@@ -15,15 +15,15 @@ const (
 )
 
 type Booking struct {
-	id              uuid.UUID
-	roomID          uuid.UUID
-	userID          uuid.UUID
-	slot            DateRange
-	price           Money
-	status          BookingStatus
-	events          []Event
-	idempotencyKey  string
-	transactionID   string
+	id             uuid.UUID
+	roomID         uuid.UUID
+	userID         uuid.UUID
+	slot           DateRange
+	price          Money
+	status         BookingStatus
+	events         []Event
+	idempotencyKey string
+	transactionID  string
 }
 
 func NewBooking(roomID, userID uuid.UUID, slot DateRange, price Money) (*Booking, error) {
@@ -43,12 +43,12 @@ func NewBooking(roomID, userID uuid.UUID, slot DateRange, price Money) (*Booking
 }
 
 func (b *Booking) ID() uuid.UUID         { return b.id }
-func (b *Booking) RoomID() uuid.UUID      { return b.roomID }
-func (b *Booking) UserID() uuid.UUID      { return b.userID }
-func (b *Booking) Slot() DateRange        { return b.slot }
-func (b *Booking) Price() Money           { return b.price }
-func (b *Booking) Status() BookingStatus  { return b.status }
-func (b *Booking) TransactionID() string  { return b.transactionID }
+func (b *Booking) RoomID() uuid.UUID     { return b.roomID }
+func (b *Booking) UserID() uuid.UUID     { return b.userID }
+func (b *Booking) Slot() DateRange       { return b.slot }
+func (b *Booking) Price() Money          { return b.price }
+func (b *Booking) Status() BookingStatus { return b.status }
+func (b *Booking) TransactionID() string { return b.transactionID }
 
 func (b *Booking) ConfirmPayment(txID string) error {
 	if strings.TrimSpace(txID) == "" {
@@ -60,6 +60,25 @@ func (b *Booking) ConfirmPayment(txID string) error {
 	b.status = Paid
 	b.transactionID = txID
 	b.raise(BookingConfirmed{BookingID: b.id.String(), TxID: txID})
+	return nil
+}
+
+func (b *Booking) Cancel() error {
+
+	if b.status == Paid {
+		return ErrBookingAlreadyPaid
+	}
+	if b.status == Cancelled {
+		return ErrAlreadyCancelled
+	}
+
+	if b.status != Pending {
+		return ErrWrongState
+	}
+	b.status = Cancelled
+
+	b.raise(BookingCancelled{BookingID: b.id.String()})
+
 	return nil
 }
 
