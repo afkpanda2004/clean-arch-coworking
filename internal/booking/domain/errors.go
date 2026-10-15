@@ -9,4 +9,5 @@ var (
 	ErrInvalidTransaction = errors.New("invalid payment transaction")
 	ErrBookingAlreadyPaid = errors.New("booking already paid")
 	ErrAlreadyCancelled   = errors.New("booking already cancelled")
+	ErrBookingConflict    = errors.New("booking already off")
 )
