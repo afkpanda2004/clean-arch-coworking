@@ -11,13 +11,14 @@ type BookingService interface {
 	CreateBooking(ctx context.Context, input CreateBookingInput) (uuid.UUID, error)
 	GetBooking(ctx context.Context, id uuid.UUID) (*BookingResponse, error)
 	ConfirmPayment(ctx context.Context, input ConfirmPaymentInput) error
-	CancelBooking(ctx context.Context, input ConfirmPaymentInput) error
+	CancelBooking(ctx context.Context, input CancelBookingInput) error
 }
 
 type BookingRepo interface {
 	Save(ctx context.Context, b *domain.Booking) error
 	FindByID(ctx context.Context, id uuid.UUID) (*domain.Booking, error)
 	FindByIdempotencyKey(ctx context.Context, key string) (*domain.Booking, error)
+	FindOverlapping(ctx context.Context, roomId uuid.UUID, slot domain.DateRange) ([]*domain.Booking, error)
 }
 
 type EventBus interface {

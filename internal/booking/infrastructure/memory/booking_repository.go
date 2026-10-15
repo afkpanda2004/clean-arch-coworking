@@ -52,3 +52,22 @@ func (r *BookingRepository) FindByIdempotencyKey(_ context.Context, key string) 
 	}
 	return booking, nil
 }
+
+func (r *BookingRepository) FindOverlapping(ctx context.Context, roomId uuid.UUID, slot domain.DateRange) ([]*domain.Booking, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	var ids []*domain.Booking
+	for _, v := range r.store {
+		if v.RoomID() != roomId {
+			continue
+		}
+
+		if !v.Slot().From.Before(slot.To) || !slot.From.Before(v.Slot().To) {
+			continue
+		}
+		ids = append(ids, v)
+	}
+
+	return ids, nil
+
+}
