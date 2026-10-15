@@ -3,14 +3,15 @@ package application
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/example/coworking/internal/booking/domain"
+	"github.com/google/uuid"
 )
 
 type BookingService interface {
 	CreateBooking(ctx context.Context, input CreateBookingInput) (uuid.UUID, error)
 	GetBooking(ctx context.Context, id uuid.UUID) (*BookingResponse, error)
 	ConfirmPayment(ctx context.Context, input ConfirmPaymentInput) error
+	CancelBooking(ctx context.Context, input ConfirmPaymentInput) error
 }
 
 type BookingRepo interface {

@@ -164,3 +164,40 @@ func (s *Service) ConfirmPayment(ctx context.Context, input ConfirmPaymentInput)
 	)
 	return nil
 }
+
+func (s *Service) CancelBooking(ctx context.Context, input CancelBookingInput) error {
+
+	if err := input.Validate(); err != nil {
+		return fmt.Errorf("invalid input: %w", err)
+	}
+
+	err := s.uow.Execute(ctx, func(repo BookingRepo, store EventStore) error {
+		booking, err := repo.FindByID(ctx, input.BookingID)
+		if err != nil {
+			return fmt.Errorf("find booking: %w", err)
+		}
+
+		if err := booking.Cancel(); err != nil {
+			return fmt.Errorf("cancel booking: %w", err)
+		}
+
+		if err := repo.Save(ctx, booking); err != nil {
+			return fmt.Errorf("save booking: %w", err)
+		}
+
+		return nil
+
+	})
+
+	if err != nil {
+		s.logger.Error("failed to cancel booking: ",
+			"error", err,
+			"booking_id", input.BookingID)
+		return err
+	}
+
+	s.logger.Info("booking cancelled",
+		"booking_id", input.BookingID)
+
+	return nil
+}

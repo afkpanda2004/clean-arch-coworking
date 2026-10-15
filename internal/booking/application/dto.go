@@ -67,3 +67,14 @@ func (i ConfirmPaymentInput) Validate() error {
 	}
 	return nil
 }
+
+type CancelBookingInput struct {
+	BookingID uuid.UUID
+}
+
+func (i CancelBookingInput) Validate() error {
+	if i.BookingID == uuid.Nil {
+		return errors.New("booking ID is required")
+	}
+	return nil
+}
