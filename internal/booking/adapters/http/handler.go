@@ -139,6 +139,8 @@ func writeError(w http.ResponseWriter, err error) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 	case errors.Is(err, domain.ErrBookingAlreadyPaid), errors.Is(err, domain.ErrAlreadyCancelled):
 		http.Error(w, err.Error(), http.StatusConflict)
+	case errors.Is(err, domain.ErrBookingConflict):
+		http.Error(w, err.Error(), http.StatusConflict)
 	default:
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}

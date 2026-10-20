@@ -44,7 +44,7 @@ func main() {
 	// Wire dependencies.
 	repo := memory.NewBookingRepository()
 	bus := busdummy.NewEventBus()
-	availabilityChecker := policydummy.NewAvailabilityChecker()
+	availabilityChecker := policydummy.NewAvailabilityChecker(repo)
 	priceCalculator := policydummy.NewPriceCalculator()
 	eventStore := outbox.NewEventStore(bus)
 	uow := transaction.NewUnitOfWork(repo, eventStore)
