@@ -25,3 +25,11 @@ db-up:
 ## db-down: stop PostgreSQL
 db-down:
 	docker compose down
+
+install:
+	go install github.com/vektra/mockery/v3@v3.8.0
+	mockery init github.com/example/coworking
+
+mock:
+	mockery
+

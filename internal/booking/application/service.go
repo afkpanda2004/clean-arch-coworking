@@ -156,6 +156,7 @@ func (s *Service) ConfirmPayment(ctx context.Context, input ConfirmPaymentInput)
 			"error", err,
 		)
 		return err
+
 	}
 
 	s.logger.Info("payment confirmed",

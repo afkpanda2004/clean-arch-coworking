@@ -125,11 +125,19 @@ func TestCancel_AlreadyPaid(t *testing.T) {
 	booking, _ := domain.NewBooking(uuid.New(), uuid.New(), slot, domain.NewMoney(200, "USD"))
 	_ = booking.ConfirmPayment("tx-123")
 
+	events := booking.PullEvents()
 	err := booking.Cancel()
-	if err != domain.ErrBookingAlreadyPaid {
-		t.Errorf("expected ErrBookingAlreadyPaid, got %v", err)
-	}
 
+	if err != domain.ErrBookingAlreadyPaid || booking.Status() != domain.Paid {
+
+		t.Errorf("expected ErrBookingAlreadyPaid , got %v", err)
+	}
+	events = booking.PullEvents()
+
+	if len(events) != 0 {
+
+		t.Errorf("expected no new events: %v", events)
+	}
 }
 
 func TestCancel_AlreadyCancelled(t *testing.T) {
