@@ -1,4 +1,4 @@
-package application
+package application_test
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/example/coworking/internal/booking/application"
 	"github.com/example/coworking/internal/booking/domain"
 	"github.com/example/coworking/internal/booking/mocks"
 	"github.com/google/uuid"
@@ -56,7 +57,7 @@ func TestCancelBooking_Success(t *testing.T) {
 		Execute(mock.Anything, mock.Anything).
 		RunAndReturn(func(
 			ctx context.Context,
-			fn func(BookingRepo, EventStore) error,
+			fn func(application.BookingRepo, application.EventStore) error,
 		) error {
 			return fn(repo, store)
 		}).
@@ -64,7 +65,7 @@ func TestCancelBooking_Success(t *testing.T) {
 
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
-	service := NewService(
+	service := application.NewService(
 		repo,
 		nil,
 		nil,
@@ -75,7 +76,7 @@ func TestCancelBooking_Success(t *testing.T) {
 
 	err = service.CancelBooking(
 		context.Background(),
-		CancelBookingInput{BookingID: bookingID},
+		application.CancelBookingInput{BookingID: bookingID},
 	)
 	if err != nil {
 		t.Fatalf("CancelBooking() error = %v", err)
@@ -96,7 +97,7 @@ func TestCancelBooking_InvalidInput(t *testing.T) {
 
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
-	service := NewService(
+	service := application.NewService(
 		repo,
 		nil,
 		nil,
@@ -107,7 +108,7 @@ func TestCancelBooking_InvalidInput(t *testing.T) {
 
 	err := service.CancelBooking(
 		context.Background(),
-		CancelBookingInput{BookingID: uuid.Nil},
+		application.CancelBookingInput{BookingID: uuid.Nil},
 	)
 
 	if err == nil {
@@ -131,7 +132,7 @@ func TestCancelBooking_FindBookingError(t *testing.T) {
 		Execute(mock.Anything, mock.Anything).
 		RunAndReturn(func(
 			ctx context.Context,
-			fn func(BookingRepo, EventStore) error,
+			fn func(application.BookingRepo, application.EventStore) error,
 		) error {
 			return fn(repo, store)
 		}).
@@ -139,7 +140,7 @@ func TestCancelBooking_FindBookingError(t *testing.T) {
 
 	bookingID := uuid.New()
 
-	service := NewService(
+	service := application.NewService(
 		repo,
 		nil,
 		nil,
@@ -150,7 +151,7 @@ func TestCancelBooking_FindBookingError(t *testing.T) {
 
 	err := service.CancelBooking(
 		context.Background(),
-		CancelBookingInput{BookingID: bookingID},
+		application.CancelBookingInput{BookingID: bookingID},
 	)
 
 	if err == nil {
@@ -199,17 +200,17 @@ func TestCancelBooking_CancelError(t *testing.T) {
 		Execute(mock.Anything, mock.Anything).
 		RunAndReturn(func(
 			ctx context.Context,
-			fn func(BookingRepo, EventStore) error,
+			fn func(application.BookingRepo, application.EventStore) error,
 		) error {
 			return fn(repo, store)
 		}).
 		Once()
 
-	service := NewService(repo, nil, nil, nil, uow, logger)
+	service := application.NewService(repo, nil, nil, nil, uow, logger)
 
 	err = service.CancelBooking(
 		context.Background(),
-		CancelBookingInput{BookingID: bookingID},
+		application.CancelBookingInput{BookingID: bookingID},
 	)
 
 	if err == nil {
@@ -259,17 +260,17 @@ func TestCancelBooking_SaveError(t *testing.T) {
 		Execute(mock.Anything, mock.Anything).
 		RunAndReturn(func(
 			ctx context.Context,
-			fn func(BookingRepo, EventStore) error,
+			fn func(application.BookingRepo, application.EventStore) error,
 		) error {
 			return fn(repo, store)
 		}).
 		Once()
 
-	service := NewService(repo, nil, nil, nil, uow, logger)
+	service := application.NewService(repo, nil, nil, nil, uow, logger)
 
 	err = service.CancelBooking(
 		context.Background(),
-		CancelBookingInput{BookingID: bookingID},
+		application.CancelBookingInput{BookingID: bookingID},
 	)
 
 	if err == nil {
